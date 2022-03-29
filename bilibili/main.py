@@ -161,7 +161,7 @@ class BiliBili(CheckIn):
         }
         url = f"https://api.bilibili.com/x/space/arc/search"
         ret = session.get(url=url, params=params).json()
-        count = 2
+        count = 1
         data_list = [
             {"aid": one.get("aid"), "cid": 0, "title": one.get("title"), "owner": one.get("author")}
             for one in ret.get("data", {}).get("list", {}).get("vlist", [])[:count]
@@ -271,7 +271,7 @@ class BiliBili(CheckIn):
         if is_login:
             manhua_msg = self.manga_sign(session=session)
             live_msg = self.live_sign(session=session)
-            aid_list = self.get_region(session=session) if coin_type == 0 else []
+            aid_list = self.get_region(session=session)
             reward_ret = self.reward(session=session)
             coins_av_count = reward_ret.get("data", {}).get("coins_av") // 10
             coin_num = coin_num - coins_av_count
@@ -289,8 +289,6 @@ class BiliBili(CheckIn):
                         if count > coin_num:
                             print("已获取足够关注用户的视频")
                             break
-                else:
-                    aid_list += self.get_region(session=session)
                 for one in aid_list[::-1]:
                     print(one)
             if coin_num > 0:
