@@ -331,7 +331,7 @@ class BiliBili(CheckIn):
                 if silver2coin_ret["code"] != 0:
                     print(s2c_msg)
             else:
-                s2c_msg="任务未开启"
+                s2c_msg = "任务未开启"
             live_stats = self.live_status(session=session)
             uname, uid, is_login, new_coin, vip_type, new_current_exp = self.get_nav(session=session)
             reward_ret = self.reward(session=session)
