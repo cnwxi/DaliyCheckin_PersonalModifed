@@ -293,7 +293,7 @@ class DuoKan(CheckIn):
         data = f"code=KYKJF7LL0G&{self.get_data(cookies=cookies)}&withid=1"
         response = requests.post(url=url, data=data, cookies=cookies, headers=self.headers)
         result = response.json()
-        if result.get("chances") == 0:
+        if result.get("chances") == 20:
             msg = {"name": "体验任务", "value": "已经做完啦"}
         elif result.get("chances"):
             num = 0
