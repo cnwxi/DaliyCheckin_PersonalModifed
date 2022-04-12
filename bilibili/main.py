@@ -24,7 +24,8 @@ class BiliBili(CheckIn):
         is_login = ret.get("data", {}).get("isLogin")
         coin = ret.get("data", {}).get("money")
         vip_type = ret.get("data", {}).get("vipType")
-        current_exp = ret.get("data", {}).get("level_info", {}).get("current_exp")
+        current_exp = ret.get("data", {}).get(
+            "level_info", {}).get("current_exp")
         return uname, uid, is_login, coin, vip_type, current_exp
 
     @staticmethod
@@ -99,7 +100,8 @@ class BiliBili(CheckIn):
         progres int 观看秒数
         """
         url = "http://api.bilibili.com/x/v2/history/report"
-        post_data = {"aid": aid, "cid": cid, "progres": progres, "csrf": bili_jct}
+        post_data = {"aid": aid, "cid": cid,
+                     "progres": progres, "csrf": bili_jct}
         ret = session.post(url=url, data=post_data).json()
         return ret
 
@@ -163,7 +165,8 @@ class BiliBili(CheckIn):
         ret = session.get(url=url, params=params).json()
         count = 1
         data_list = [
-            {"aid": one.get("aid"), "cid": 0, "title": one.get("title"), "owner": one.get("author")}
+            {"aid": one.get("aid"), "cid": 0, "title": one.get(
+                "title"), "owner": one.get("author")}
             for one in ret.get("data", {}).get("list", {}).get("vlist", [])[:count]
         ]
 
@@ -177,7 +180,8 @@ class BiliBili(CheckIn):
         num int 充电电池数量
         """
         url = "https://api.bilibili.com/x/ugcpay/trade/elec/pay/quick"
-        post_data = {"elec_num": num, "up_mid": uid, "otype": "up", "oid": uid, "csrf": bili_jct}
+        post_data = {"elec_num": num, "up_mid": uid,
+                     "otype": "up", "oid": uid, "csrf": bili_jct}
         ret = session.post(url=url, data=post_data).json()
         return ret
 
@@ -224,7 +228,8 @@ class BiliBili(CheckIn):
         rid int 分区号
         num int 获取视频数量
         """
-        url = "https://api.bilibili.com/x/web-interface/dynamic/region?ps=" + str(num) + "&rid=" + str(rid)
+        url = "https://api.bilibili.com/x/web-interface/dynamic/region?ps=" + \
+            str(num) + "&rid=" + str(rid)
         ret = session.get(url=url).json()
         data_list = [
             {
@@ -250,7 +255,8 @@ class BiliBili(CheckIn):
 
     # 有改动
     def main(self):
-        bilibili_cookie = {item.split("=")[0]: item.split("=")[1] for item in self.check_item.get("cookie").split("; ")}
+        bilibili_cookie = {item.split("=")[0]: item.split(
+            "=")[1] for item in self.check_item.get("cookie").split("; ")}
         bili_jct = bilibili_cookie.get("bili_jct")
         coin_num = self.check_item.get("coin_num", 0)
         coin_type = self.check_item.get("coin_type", 1)
@@ -266,7 +272,8 @@ class BiliBili(CheckIn):
             }
         )
         success_count = 0
-        uname, uid, is_login, coin, vip_type, current_exp = self.get_nav(session=session)
+        uname, uid, is_login, coin, vip_type, current_exp = self.get_nav(
+            session=session)
 
         if is_login:
             manhua_msg = self.manga_sign(session=session)
@@ -279,21 +286,22 @@ class BiliBili(CheckIn):
             if coin_type == 1:
                 following_list = self.get_followings(session=session, uid=uid)
                 count = 0
+                rate = 5
                 for following in following_list.get("data", {}).get("list"):
                     mid = following.get("mid")
                     if mid:
-                        tmplist, tmpcount = self.space_arc_search(session=session, uid=mid)
+                        tmplist, tmpcount = self.space_arc_search(
+                            session=session, uid=mid)
                         aid_list += tmplist
                         count += tmpcount
                         # aid_list += self.space_arc_search(session=session, uid=mid)
-                        if count > coin_num:
+                        if (count * rate) > coin_num:
                             print("已获取足够关注用户的视频")
                             break
-                for one in aid_list[::-1]:
-                    print(one)
             if coin_num > 0:
                 for aid in aid_list[::-1]:
-                    ret = self.coin_add(session=session, aid=aid.get("aid"), bili_jct=bili_jct)
+                    ret = self.coin_add(
+                        session=session, aid=aid.get("aid"), bili_jct=bili_jct)
                     if ret["code"] == 0:
                         coin_num -= 1
                         print(f'成功给{aid.get("title")}投一个币')
@@ -303,7 +311,8 @@ class BiliBili(CheckIn):
                         continue
                         # -104 硬币不够了 -111 csrf 失败 34005 投币达到上限
                     else:
-                        print(f'投币{aid.get("title")}失败，原因为{ret["message"]}，跳过投币')
+                        print(
+                            f'投币{aid.get("title")}失败，原因为{ret["message"]}，跳过投币')
                         break
                     if coin_num <= 0:
                         break
@@ -313,49 +322,56 @@ class BiliBili(CheckIn):
             aid = aid_list[0].get("aid")
             cid = aid_list[0].get("cid")
             title = aid_list[0].get("title")
-            report_ret = self.report_task(session=session, bili_jct=bili_jct, aid=aid, cid=cid)
+            report_ret = self.report_task(
+                session=session, bili_jct=bili_jct, aid=aid, cid=cid)
             if report_ret.get("code") == 0:
                 report_msg = f"观看《{title}》300秒"
             else:
                 report_msg = f"任务失败"
                 print(report_msg)
-            share_ret = self.share_task(session=session, bili_jct=bili_jct, aid=aid)
+            share_ret = self.share_task(
+                session=session, bili_jct=bili_jct, aid=aid)
             if share_ret.get("code") == 0:
                 share_msg = f"分享《{title}》成功"
             else:
                 share_msg = f"分享失败"
                 print(share_msg)
             if silver2coin:
-                silver2coin_ret = self.silver2coin(session=session, bili_jct=bili_jct)
+                silver2coin_ret = self.silver2coin(
+                    session=session, bili_jct=bili_jct)
                 s2c_msg = silver2coin_ret["message"]
                 if silver2coin_ret["code"] != 0:
                     print(s2c_msg)
             else:
                 s2c_msg = "任务未开启"
             live_stats = self.live_status(session=session)
-            uname, uid, is_login, new_coin, vip_type, new_current_exp = self.get_nav(session=session)
+            uname, uid, is_login, new_coin, vip_type, new_current_exp = self.get_nav(
+                session=session)
             reward_ret = self.reward(session=session)
             login = reward_ret.get("data", {}).get("login")
             watch_av = reward_ret.get("data", {}).get("watch_av")
             coins_av = reward_ret.get("data", {}).get("coins_av", 0)
             share_av = reward_ret.get("data", {}).get("share_av")
-            today_exp = len([one for one in [login, watch_av, share_av] if one]) * 5
+            today_exp = len(
+                [one for one in [login, watch_av, share_av] if one]) * 5
             today_exp += coins_av
-            update_data = (28800 - new_current_exp) // (today_exp if today_exp else 1)
+            update_data = (
+                28800 - new_current_exp) // (today_exp if today_exp else 1)
             msg = [
-                      {"name": "帐号信息", "value": uname},
-                      {"name": "漫画签到", "value": manhua_msg},
-                      {"name": "直播签到", "value": live_msg},
-                      {"name": "登陆任务", "value": "今日已登陆"},
-                      {"name": "观看视频", "value": report_msg},
-                      {"name": "分享任务", "value": share_msg},
-                      {"name": "瓜子兑换", "value": s2c_msg},
-                      {"name": "投币任务", "value": coin_msg},
-                      {"name": "今日经验", "value": today_exp},
-                      {"name": "当前经验", "value": new_current_exp},
-                      {"name": "升级还需", "value": f"{update_data}天"},
-                  ] + live_stats
-            msg = "\n".join([f"{one.get('name')}: {one.get('value')}" for one in msg])
+                {"name": "帐号信息", "value": uname},
+                {"name": "漫画签到", "value": manhua_msg},
+                {"name": "直播签到", "value": live_msg},
+                {"name": "登陆任务", "value": "今日已登陆"},
+                {"name": "观看视频", "value": report_msg},
+                {"name": "分享任务", "value": share_msg},
+                {"name": "瓜子兑换", "value": s2c_msg},
+                {"name": "投币任务", "value": coin_msg},
+                {"name": "今日经验", "value": today_exp},
+                {"name": "当前经验", "value": new_current_exp},
+                {"name": "升级还需", "value": f"{update_data}天"},
+            ] + live_stats
+            msg = "\n".join(
+                [f"{one.get('name')}: {one.get('value')}" for one in msg])
             return msg
 
 
