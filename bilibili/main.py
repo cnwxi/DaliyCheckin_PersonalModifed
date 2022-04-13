@@ -295,7 +295,7 @@ class BiliBili(CheckIn):
                         aid_list += tmplist
                         count += tmpcount
                         # aid_list += self.space_arc_search(session=session, uid=mid)
-                        if (count * rate) > coin_num:
+                        if (count // rate) >= coin_num:
                             print("已获取足够关注用户的视频")
                             break
             if coin_num > 0:
