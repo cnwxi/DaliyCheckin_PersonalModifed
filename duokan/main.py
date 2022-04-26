@@ -384,8 +384,7 @@ class DuoKan(CheckIn):
 
 
 if __name__ == "__main__":
-    with open(os.path.join(os.path.dirname(os.path.dirname(__file__)), "../config/config.json"), "r",
-              encoding="utf-8") as f:
+    with open("../../config/config.json", "r", encoding="utf-8") as f:
         datas = json.loads(f.read())
     _check_item = datas.get("DUOKAN", [])[0]
     print(DuoKan(check_item=_check_item).main())
