@@ -84,6 +84,8 @@ class Tieba(CheckIn):
     def main(self):
         tieba_cookie = {item.split("=")[0]: item.split("=")[1] for item in self.check_item.get("cookie").split("; ")}
         session = requests.session()
+        session.trust_env = False
+        session.verify = False
         requests.utils.add_dict_to_cookiejar(session.cookies, tieba_cookie)
         session.headers.update({"Referer": "https://www.baidu.com/"})
         tbs, user_name = self.valid(session=session)
